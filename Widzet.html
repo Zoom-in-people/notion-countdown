@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Slide Countdown</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .timer {
+      display: flex;
+      gap: 10px;
+    }
+
+    .time-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .number-box {
+      position: relative;
+      width: 60px;
+      height: 80px;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #000;
+      color: white;
+      font-size: 36px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 80px;
+    }
+
+    .number-slide {
+      position: absolute;
+      width: 100%;
+      height: 80px;
+      left: 0;
+      transition: transform 0.4s ease-in-out;
+    }
+
+    .label {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .countup .number-box {
+      background: #ffd6e0; /* 연핑크 */
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="timer">
+    <div class="time-unit" id="hours-unit">
+      <div class="number-box">
+        <div class="number-slide" id="hours-slide">--</div>
+      </div>
+      <div class="label">시</div>
+    </div>
+    <div class="time-unit" id="minutes-unit">
+      <div class="number-box">
+        <div class="number-slide" id="minutes-slide">--</div>
+      </div>
+      <div class="label">분</div>
+    </div>
+    <div class="time-unit" id="seconds-unit">
+      <div class="number-box">
+        <div class="number-slide" id="seconds-slide">--</div>
+      </div>
+      <div class="label">초</div>
+    </div>
+  </div>
+
+  <script>
+    let prevTime = { h: '--', m: '--', s: '--' };
+
+    function updateTime() {
+      const now = new Date();
+      const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 30, 0);
+      let diff = target - now;
+      let isCountUp = false;
+
+      if (diff < 0) {
+        diff = now - target;
+        isCountUp = true;
+      }
+
+      const h = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
+      const m = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+      const s = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+
+      updateSlide('hours', h, prevTime.h, isCountUp);
+      updateSlide('minutes', m, prevTime.m, isCountUp);
+      updateSlide('seconds', s, prevTime.s, isCountUp);
+
+      prevTime = { h, m, s };
+    }
+
+    function updateSlide(unit, newVal, oldVal, isCountUp) {
+      const slide = document.getElementById(`${unit}-slide`);
+      const unitBox = document.getElementById(`${unit}-unit`);
+
+      if (newVal !== oldVal) {
+        slide.style.transform = 'translateY(-100%)';
+        slide.innerHTML = `${oldVal}<br>${newVal}`;
+        setTimeout(() => {
+          slide.style.transition = 'none';
+          slide.style.transform = 'translateY(0)';
+          slide.innerHTML = newVal;
+          // transition 다시 설정
+          void slide.offsetWidth;
+          slide.style.transition = 'transform 0.4s ease-in-out';
+        }, 400);
+      }
+
+      if (isCountUp) {
+        unitBox.classList.add('countup');
+      } else {
+        unitBox.classList.remove('countup');
+      }
+    }
+
+    setInterval(updateTime, 1000);
+    updateTime();
+  </script>
+</body>
+</html>
